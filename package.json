@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "cross-env NODE_ENV=test && mocha test/functional/api/FoodsTest.js --timeout 50000"
+    "test": "cross-env NODE_ENV=test && mocha  --timeout 50000"
   },
   "dependencies": {
     "chai-http": "^4.3.0",
