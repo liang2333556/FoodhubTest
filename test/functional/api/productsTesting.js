@@ -4,100 +4,108 @@ var mocha = require('mocha')
 const expect = chai.expect;
 const request = require("supertest");
 const _ = require("lodash");
-describe("Foods", () => {
-    describe("GET /foods", () => {
-        it("should return all the foods", done => {
+describe("Products", () => {
+    describe("GET /products", () => {
+        it("should return all the products", done => {
             request(server)
-                .get("/foods")
+                .get("/products")
                 .set("Accept", "application/json")
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .end((err, res) => {
                     expect(res.body).to.be.a("array");
-                    const result = _.map(res.body, food => {
-                        return {type: food.type, author: food.author};
+                    const result = _.map(res.body, product => {
+                        return {type: product.type, name: product.name, price: product.price};
                     });
-                    expect(result).to.deep.include({type: "Chinese", author: "leon"});
+                    expect(result).to.deep.include({type: "Chinese", name: "dumplings", price: 10});
 
                     done(err);
                 });
         });
     });
 
-    describe("GET /foods/:id", () => {
+    describe("GET /products/:id", () => {
         describe("when the id is valid", () => {
-            it("should return the matching food", done => {
+            it("should return the matching product", done => {
                 request(server)
-                    .get("/foods/5db44fab3d1eaa46dc2a5cc7")
+                    .get("/products/5db44c8e3d1eaa46dc2a5cc6")
                     .set("Accept", "application/json")
                     .expect("Content-Type", /json/)
                     .expect(200)
                     .end((err, res) => {
-                        const result = _.map(res.body, food => {
-                            return {type: food.type, author: food.author};
+                        const result = _.map(res.body, product => {
+                            return {type: product.type, name: product.name, price: product.price};
                         });
-                        expect(result).to.deep.include({type: "Chinese", author: "leon"});
+                        expect(result).to.deep.include({type: "Chinese", name: "dumplings", price: 10});
 
                         done(err);
                     });
 
             });
         });
+
         describe("when the id is invalid", () => {
-            it("should return the NOT found message", done => {
+            it("should return the NOT found message", () => {
                 request(server)
-                    .get("/foods/5db032341c9d4")
+                    .delete("/products/999")
                     .set("Accept", "application/json")
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .expect({message: "Food NOT Found!"}, (err, res) => {
-                        done(err);
+                    .expect({message: "Product NOT Found!"}, (err, res) => {
                     });
             });
         });
     });
-    describe("POST /foods", () => {
+
+    describe("POST /products", () => {
         it("should return confirmation message and update ", () => {
-            const food = {
-                type: "Korea food",
-                author: "Stephen",
-                likes: 0
+            const product = {
+                type: "Asia food",
+                name: "leon",
+                price: 2,
+                likes: 1,
             };
 
             return request(server)
-                .post("/foods")
-                .send(food)
+                .post("/products")
+                .send(product)
                 .set("Accept", "application/json")
                 .expect("Content-Type", /json/)
                 .expect(200)
                 .then(res => {
-                    expect(res.body.message).equals("Food Added!");
+                    expect(res.body.message).equals("Product Successfully Added!");
                 });
         });
         after(() => {
             return request(server)
-                .get("/foods")
+                .get("/products")
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
                 .expect(200)
                 .then(res => {
-                    const result = _.map(res.body, food => {
+                    const result = _.map(res.body, product => {
                         return {
-                            type: food.type,
-                            author: food.author,
-                            likes: food.likes,
+                            type: product.type,
+                            price: product.price,
+                            name: product.name,
+                            likes: product.likes,
                         };
                     });
                     expect(result).to.deep.include({
-                        type: "Korea food",
-                        author:"Stephen",
-                        likes: 0 });
+                        type: "Asia food",
+                        name:"leon",
+                        price:2,
+                        likes:1,});
                 });
         });
     });
-    describe("PUT /foods/:id/likes", () => {
+
+
+    describe("PUT /products/:id/likes", () => {
         describe("when the id is valid", () => {
             it("should return a message and likes increase 1", () => {
                 return request(server)
-                    .put("/foods/5db44fab3d1eaa46dc2a5cc7/likes")
+                    .put("/products/5db44c8e3d1eaa46dc2a5cc6/likes")
                     .expect(200)
                     .then(res => {
                         expect(res.body).to.include({
@@ -108,21 +116,22 @@ describe("Foods", () => {
             });
             after(() => {
                 return request(server)
-                    .get("/foods/5db44fab3d1eaa46dc2a5cc7")
+                    .get("/products")
                     .set("Accept", "application/json")
                     .expect("Content-Type", /json/)
                     .expect(200)
                     .then(res => {
-                        const result = _.map(res.body, food => {
+                        const result = _.map(res.body, product => {
                             return {
-                                type: food.type,
-                                author: food.author,
-                                // likes:food.likes,
+                                type: product.type,
+                                price: product.price,
+                                name: product.name,
                             };
                         });
                         expect(result).to.deep.include({
                             type: "Chinese",
-                            author: "leon"
+                            name: "dumplings",
+                            price: 10
                         });
                     });
             });
@@ -130,12 +139,12 @@ describe("Foods", () => {
         describe("when the id is invalid", () => {
             it("should return a 404 and a message for invalid donation id", () => {
                 return request(server)
-                    .put("/foods/50000/likes")
+                    .put("/products/50000/likes")
                     .expect(200)
 
                     .then(res => {
                         expect(res.body).to.include({
-                            message: "Food NOT Found!"
+                            message: "Product NOT Found!"
                         });
 
                     });
@@ -144,15 +153,16 @@ describe("Foods", () => {
             });
         });
     });
-    describe("DELETE /foods/:id", () => {
+
+    describe("DELETE /products/:id", () => {
         describe("when the id is valid", () => {
-            it("should delete the matching food", () => {
+            it("should delete the matching product", () => {
                 return request(server)
-                    .delete("/foods/5db398d91c9d4400001bc11f")
+                    .delete("/products/5db3991a1c9d4400001bc123")
                     .expect(200)
                     .then(resp => {
                         expect(resp.body).to.include({
-                            message: "Food  Successfully Deleted!"
+                            message: "Product Successfully Deleted!"
                         });
 
                     });
@@ -160,19 +170,20 @@ describe("Foods", () => {
 
             after(() => {
                 return request(server)
-                    .get("/foods")
+                    .get("/products")
                     .set("Accept", "application/json")
                     .expect("Content-Type", /json/)
                     .expect(200)
                     .then(res => {
-                        const result = _.map(res.body, foods => {
+                        const result = _.map(res.body, products => {
                             return {
-                                type: foods.type,
-                                author: foods.author,
-                                likes: foods.likes,
+                                type: products.type,
+                                name: products.name,
+                                price: products.price,
+                                likes: products.likes,
                             };
                         });
-                        expect(result).to.not.include({type: "cake", author: "cole", likes: 0});
+                        expect(result).to.not.include({type: "China", name: "apple", price: 1, likes: 0});
                     });
             });
         });
@@ -180,11 +191,11 @@ describe("Foods", () => {
         describe("when the id is invalid", () => {
             it("should return the NOT found message", () => {
                 request(server)
-                    .delete("/foods/999")
+                    .delete("/products/999")
                     .set("Accept", "application/json")
                     .expect("Content-Type", /json/)
                     .expect(200)
-                    .expect({message: "Food NOT DELETED!"}, (err, res) => {
+                    .expect({message: "Product NOT DELETED!"}, (err, res) => {
                     });
 
             });
@@ -194,6 +205,3 @@ describe("Foods", () => {
     });
 
 });
-
-
-
