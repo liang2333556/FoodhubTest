@@ -27,7 +27,7 @@ describe("Foods", () => {
     describe("when the id is valid", () => {
       it("should return the matching food", done => {
         request(server)
-          .get("/foods/5db44fab3d1eaa46dc2a5cc7")
+          .get("/foods/5dc00b631c9d4400005e4c46")
           .set("Accept", "application/json")
           .expect("Content-Type", /json/)
           .expect(200)
@@ -45,7 +45,7 @@ describe("Foods", () => {
     describe("when the id is invalid", () => {
       it("should return the NOT found message", done => {
         request(server)
-          .get("/foods/5db032341c9d4")
+          .get("/foods/5dc7777")
           .set("Accept", "application/json")
           .expect("Content-Type", /json/)
           .expect(200)
@@ -96,7 +96,7 @@ describe("Foods", () => {
     describe("when the id is valid", () => {
       it("should return a message and likes increase 1", () => {
         return request(server)
-          .put("/foods/5db44fab3d1eaa46dc2a5cc7/likes")
+          .put("/foods/5dc00b631c9d4400005e4c46/likes")
           .expect(200)
           .then(res => {
             expect(res.body).to.include({
@@ -107,7 +107,7 @@ describe("Foods", () => {
       })
       after(() => {
         return request(server)
-          .get("/foods/5db44fab3d1eaa46dc2a5cc7")
+          .get("/foods/5dc00b631c9d4400005e4c46")
           .set("Accept", "application/json")
           .expect("Content-Type", /json/)
           .expect(200)
